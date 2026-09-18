@@ -42,7 +42,7 @@
       <!-- Área Directa -->
       <div>
         <label class="block text-xs font-semibold text-slate-400 mb-1">O Área Total de Superficie (m²):</label>
-        <input type="number" id="pArea" placeholder="Ej. 60" oninput="clearPinturaDims()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
+        <input type="number" id="pArea" placeholder="Ej. 100" oninput="clearPinturaDims()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
       </div>
 
       <!-- Selector de Línea Real Meridian -->
@@ -58,16 +58,15 @@
       <!-- Opción Venta Cruzada: Preparador de Muros -->
       <div class="space-y-3 pt-1 border-t border-slate-800/80 mt-2">
         <label class="flex items-center space-x-3 text-xs text-slate-300 cursor-pointer">
-          <input type="checkbox" id="pIncSellador" checked onchange="toggleTipoMuro()" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500">
+          <input type="checkbox" id="pIncSellador" checked class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500">
           <span class="font-medium text-slate-200">Incluir Preparador de Muros / Sellador</span>
         </label>
 
-        <!-- Selector Tipo de Muro (Solo si está activo el sellador) -->
-        <div id="containerTipoMuro" class="pl-7 space-y-1">
+        <div class="pl-7 space-y-1">
           <label class="block text-[11px] font-semibold text-slate-400 mb-1">Condición de la Pared:</label>
           <select id="tipoMuro" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
-            <option value="repintado" selected>Muro Repintado (Dilución 5 a 1 — 30 m²/L)</option>
-            <option value="nuevo">Muro Nuevo / Sin Pintar (Dilución 3 a 1 — 20 m²/L)</option>
+            <option value="repintado" selected>Muro Repintado (Dilución 5 a 1)</option>
+            <option value="nuevo">Muro Nuevo / Sin Pintar (Dilución 3 a 1)</option>
           </select>
         </div>
       </div>
@@ -139,7 +138,6 @@
 
   <!-- LÓGICA JAVASCRIPT -->
   <script>
-    // Cambiar entre pestañas
     function switchTab(tab) {
       const btnPintura = document.getElementById('tabPintura');
       const btnImper = document.getElementById('tabImper');
@@ -159,18 +157,6 @@
       }
     }
 
-    // Ocultar/Mostrar selector de tipo de muro
-    function toggleTipoMuro() {
-      const inc = document.getElementById('pIncSellador').checked;
-      const cont = document.getElementById('containerTipoMuro');
-      if (inc) {
-        cont.classList.remove('hidden');
-      } else {
-        cont.classList.add('hidden');
-      }
-    }
-
-    // Helpers de multiplicación de área Pintura
     function calcAreaPintura() {
       const ancho = parseFloat(document.getElementById('pAncho').value) || 0;
       const alto = parseFloat(document.getElementById('pAlto').value) || 0;
@@ -183,7 +169,6 @@
       document.getElementById('pAlto').value = '';
     }
 
-    // Helpers de multiplicación de área Impermeabilizante
     function calcAreaImper() {
       const largo = parseFloat(document.getElementById('iLargo').value) || 0;
       const ancho = parseFloat(document.getElementById('iAncho').value) || 0;
@@ -196,14 +181,12 @@
       document.getElementById('iAncho').value = '';
     }
 
-    // Rendimientos en m² cubiertos a 2 manos por empaque
     const RENDIMIENTOS_PINTURA = {
       premier: { nombre: "Meridian Premier", cubeta: 160, galon: 33.6, litro: 8.4 },
       plus: { nombre: "Meridian Plus", cubeta: 140, galon: 29.4, litro: 7.4 },
       clasica: { nombre: "Meridian Clásica", cubeta: 120, galon: 26, litro: 6.5 }
     };
 
-    // Algoritmo de desglose de empaques optimizado para Pintura
     function calcularPintura() {
       const area = parseFloat(document.getElementById('pArea').value) || 0;
       const lineaKey = document.getElementById('lineaPintura').value;
@@ -220,7 +203,7 @@
       const linea = RENDIMIENTOS_PINTURA[lineaKey];
       let m2Restantes = area;
 
-      // 1. Cubetas de 19L
+      // 1. Cubetas de Pintura
       let cubetas = Math.floor(m2Restantes / linea.cubeta);
       m2Restantes %= linea.cubeta;
 
@@ -229,7 +212,7 @@
         m2Restantes = 0;
       }
 
-      // 2. Galones de 4L
+      // 2. Galones de Pintura
       let galones = 0;
       if (m2Restantes > 0) {
         galones = Math.floor(m2Restantes / linea.galon);
@@ -241,28 +224,25 @@
         }
       }
 
-      // 3. Litros puros (1L)
+      // 3. Litros de Pintura
       let litros = 0;
       if (m2Restantes > 0) {
         litros = Math.ceil(m2Restantes / linea.litro);
       }
 
-      // Armar string de presentación Pintura
       let empaquesStr = [];
       if (cubetas > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${cubetas} Cubeta(s) 19L</span>`);
       if (galones > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${galones} Galón(es) 4L</span>`);
       if (litros > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${litros} Bote(s) 1L</span>`);
 
-      // 4. Cálculo de Sellador de Muros según la dilución
-      // Repintado (5:1) -> 30 m²/L concentrado (Cubeta = 570m², Galón = 120m², Litro = 30m²)
-      // Nuevo (3:1) -> 20 m²/L concentrado (Cubeta = 380m², Galón = 80m², Litro = 20m²)
+      // 4. Cálculo de Sellador (1L = 30m² | Galón 4L = 120m² | Cubeta 19L = 570m²)
       let selladorStr = "";
       let textoDilucion = "";
 
       if (incSellador) {
-        const rendL = tipoMuro === 'repintado' ? 30 : 20;
-        const rendG = rendL * 4;   // 120m² o 80m²
-        const rendC = rendL * 19;  // 570m² o 380m²
+        const rendL = 30;
+        const rendG = 120;
+        const rendC = 570;
 
         let sCubetas = Math.floor(area / rendC);
         let sRest = area % rendC;
@@ -278,7 +258,8 @@
           sGalones = Math.floor(sRest / rendG);
           sRest %= rendG;
 
-          if (sRest >= rendL * 3) {
+          // Si faltan más de 2.2 litros, salta a Galón (4L)
+          if (sRest >= rendL * 2.2) {
             sGalones += 1;
             sRest = 0;
           }
@@ -295,8 +276,8 @@
         selladorStr = sParts.join(' + ');
 
         textoDilucion = tipoMuro === 'repintado'
-          ? "Diluir 5 a 1 con agua (5 Litros de agua por cada 1 Litro de sellador)."
-          : "Diluir 3 a 1 con agua (3 Litros de agua por cada 1 Litro de sellador).";
+          ? "Dilución 5 a 1 con agua (5 Litros de agua por cada 1 Litro de sellador)."
+          : "Dilución 3 a 1 con agua (3 Litros de agua por cada 1 Litro de sellador).";
       }
 
       let html = `
@@ -324,14 +305,12 @@
       card.classList.remove('hidden');
     }
 
-    // Rendimientos específicos por línea de Impermeabilizante
     const RENDIMIENTOS_IMPER = {
       "3": { nombre: "Meridian 3 Años", cubeta: 19 },
       "5": { nombre: "Meridian 5 Años", cubeta: 16 },
       "7": { nombre: "Meridian 7 Años", cubeta: 14 }
     };
 
-    // Algoritmo Desglose Impermeabilizante con Primada/Sellador 1:4
     function calcularImper() {
       const area = parseFloat(document.getElementById('iArea').value) || 0;
       const lineaKey = document.getElementById('lineaImper').value;
@@ -346,19 +325,15 @@
       }
 
       const producto = RENDIMIENTOS_IMPER[lineaKey];
-      
-      // 1. Litros puros para 2 manos
       const litrosPorM2 = 19 / producto.cubeta;
       let litrosPurosTotales = area * litrosPorM2;
 
-      // 2. Litros puros adicionales para Sellador (1L puro + 4L agua rinde 25 m²)
       let litrosSelladorPuro = 0;
       if (incSellador) {
         litrosSelladorPuro = area / 25;
         litrosPurosTotales += litrosSelladorPuro;
       }
 
-      // 3. Conversión a Cubetas (19L), Galones (4L) y Litros (1L)
       let cubetas = Math.floor(litrosPurosTotales / 19);
       let litrosRestantes = litrosPurosTotales % 19;
 
@@ -383,7 +358,6 @@
         litros = Math.ceil(litrosRestantes);
       }
 
-      // 4. Malla de Refuerzo (+10% traslape)
       const m2Malla = incMalla ? (area * 1.10).toFixed(1) : 0;
       const aguaParaSellador = (litrosSelladorPuro * 4).toFixed(1);
 
