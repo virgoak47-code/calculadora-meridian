@@ -42,7 +42,7 @@
       <!-- Área Directa -->
       <div>
         <label class="block text-xs font-semibold text-slate-400 mb-1">O Área Total de Superficie (m²):</label>
-        <input type="number" id="pArea" placeholder="Ej. 90" oninput="clearPinturaDims()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
+        <input type="number" id="pArea" placeholder="Ej. 60" oninput="clearPinturaDims()" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition">
       </div>
 
       <!-- Selector de Línea Real Meridian -->
@@ -56,11 +56,20 @@
       </div>
 
       <!-- Opción Venta Cruzada: Preparador de Muros -->
-      <div class="space-y-2 pt-1">
+      <div class="space-y-3 pt-1 border-t border-slate-800/80 mt-2">
         <label class="flex items-center space-x-3 text-xs text-slate-300 cursor-pointer">
-          <input type="checkbox" id="pIncSellador" checked class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500">
-          <span>Incluir Preparador de Muros / Sellador Vinílico</span>
+          <input type="checkbox" id="pIncSellador" checked onchange="toggleTipoMuro()" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500">
+          <span class="font-medium text-slate-200">Incluir Preparador de Muros / Sellador</span>
         </label>
+
+        <!-- Selector Tipo de Muro (Solo si está activo el sellador) -->
+        <div id="containerTipoMuro" class="pl-7 space-y-1">
+          <label class="block text-[11px] font-semibold text-slate-400 mb-1">Condición de la Pared:</label>
+          <select id="tipoMuro" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
+            <option value="repintado" selected>Muro Repintado (Dilución 5 a 1 — 30 m²/L)</option>
+            <option value="nuevo">Muro Nuevo / Sin Pintar (Dilución 3 a 1 — 20 m²/L)</option>
+          </select>
+        </div>
       </div>
 
       <!-- Botón Calcular -->
@@ -150,6 +159,17 @@
       }
     }
 
+    // Ocultar/Mostrar selector de tipo de muro
+    function toggleTipoMuro() {
+      const inc = document.getElementById('pIncSellador').checked;
+      const cont = document.getElementById('containerTipoMuro');
+      if (inc) {
+        cont.classList.remove('hidden');
+      } else {
+        cont.classList.add('hidden');
+      }
+    }
+
     // Helpers de multiplicación de área Pintura
     function calcAreaPintura() {
       const ancho = parseFloat(document.getElementById('pAncho').value) || 0;
@@ -188,6 +208,7 @@
       const area = parseFloat(document.getElementById('pArea').value) || 0;
       const lineaKey = document.getElementById('lineaPintura').value;
       const incSellador = document.getElementById('pIncSellador').checked;
+      const tipoMuro = document.getElementById('tipoMuro').value;
       const card = document.getElementById('resPinturaCard');
       const cont = document.getElementById('resPinturaCont');
 
@@ -232,24 +253,39 @@
       if (galones > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${galones} Galón(es) 4L</span>`);
       if (litros > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${litros} Bote(s) 1L</span>`);
 
-      // 4. Cálculo de Preparador/Sellador de Muros (1 Cubeta rinde 150m², 1 Galón 30m², 1L 7.5m²)
+      // 4. Cálculo de Sellador de Muros según la dilución
+      // Repintado (5:1) -> 30 m²/L concentrado (Cubeta = 570m², Galón = 120m², Litro = 30m²)
+      // Nuevo (3:1) -> 20 m²/L concentrado (Cubeta = 380m², Galón = 80m², Litro = 20m²)
       let selladorStr = "";
+      let textoDilucion = "";
+
       if (incSellador) {
-        let sCubetas = Math.floor(area / 150);
-        let sRest = area % 150;
+        const rendL = tipoMuro === 'repintado' ? 30 : 20;
+        const rendG = rendL * 4;   // 120m² o 80m²
+        const rendC = rendL * 19;  // 570m² o 380m²
+
+        let sCubetas = Math.floor(area / rendC);
+        let sRest = area % rendC;
         let sGalones = 0;
         let sLitros = 0;
 
+        if (sRest >= rendG * 3.5) {
+          sCubetas += 1;
+          sRest = 0;
+        }
+
         if (sRest > 0) {
-          sGalones = Math.floor(sRest / 30);
-          sRest %= 30;
-          if (sRest >= 22.5) {
+          sGalones = Math.floor(sRest / rendG);
+          sRest %= rendG;
+
+          if (sRest >= rendL * 3) {
             sGalones += 1;
             sRest = 0;
           }
         }
+
         if (sRest > 0) {
-          sLitros = Math.ceil(sRest / 7.5);
+          sLitros = Math.ceil(sRest / rendL);
         }
 
         let sParts = [];
@@ -257,6 +293,10 @@
         if (sGalones > 0) sParts.push(`${sGalones} Galón(es) 4L`);
         if (sLitros > 0) sParts.push(`${sLitros} Bote(s) 1L`);
         selladorStr = sParts.join(' + ');
+
+        textoDilucion = tipoMuro === 'repintado'
+          ? "Diluir 5 a 1 con agua (5 Litros de agua por cada 1 Litro de sellador)."
+          : "Diluir 3 a 1 con agua (3 Litros de agua por cada 1 Litro de sellador).";
       }
 
       let html = `
@@ -274,6 +314,7 @@
           <div class="border-t border-slate-800 pt-2">
             <p class="text-slate-400 font-semibold mb-1">• Preparador/Sellador de Muros:</p>
             <p class="text-emerald-400 font-bold text-sm">${selladorStr}</p>
+            <p class="text-[11px] text-slate-400 mt-1">${textoDilucion}</p>
           </div>
         `;
       }
