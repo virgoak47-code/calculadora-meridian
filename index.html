@@ -55,6 +55,14 @@
         </select>
       </div>
 
+      <!-- Opción Venta Cruzada: Preparador de Muros -->
+      <div class="space-y-2 pt-1">
+        <label class="flex items-center space-x-3 text-xs text-slate-300 cursor-pointer">
+          <input type="checkbox" id="pIncSellador" checked class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-600 focus:ring-blue-500">
+          <span>Incluir Preparador de Muros / Sellador Vinílico</span>
+        </label>
+      </div>
+
       <!-- Botón Calcular -->
       <button onclick="calcularPintura()" class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all text-sm mt-2">
         Calcular Pintura
@@ -179,6 +187,7 @@
     function calcularPintura() {
       const area = parseFloat(document.getElementById('pArea').value) || 0;
       const lineaKey = document.getElementById('lineaPintura').value;
+      const incSellador = document.getElementById('pIncSellador').checked;
       const card = document.getElementById('resPinturaCard');
       const cont = document.getElementById('resPinturaCont');
 
@@ -217,20 +226,60 @@
         litros = Math.ceil(m2Restantes / linea.litro);
       }
 
-      // Armar string de presentación
+      // Armar string de presentación Pintura
       let empaquesStr = [];
       if (cubetas > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${cubetas} Cubeta(s) 19L</span>`);
       if (galones > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${galones} Galón(es) 4L</span>`);
       if (litros > 0) empaquesStr.push(`<span class="font-bold text-emerald-400">${litros} Bote(s) 1L</span>`);
 
-      cont.innerHTML = `
+      // 4. Cálculo de Preparador/Sellador de Muros (1 Cubeta rinde 150m², 1 Galón 30m², 1L 7.5m²)
+      let selladorStr = "";
+      if (incSellador) {
+        let sCubetas = Math.floor(area / 150);
+        let sRest = area % 150;
+        let sGalones = 0;
+        let sLitros = 0;
+
+        if (sRest > 0) {
+          sGalones = Math.floor(sRest / 30);
+          sRest %= 30;
+          if (sRest >= 22.5) {
+            sGalones += 1;
+            sRest = 0;
+          }
+        }
+        if (sRest > 0) {
+          sLitros = Math.ceil(sRest / 7.5);
+        }
+
+        let sParts = [];
+        if (sCubetas > 0) sParts.push(`${sCubetas} Cubeta(s) 19L`);
+        if (sGalones > 0) sParts.push(`${sGalones} Galón(es) 4L`);
+        if (sLitros > 0) sParts.push(`${sLitros} Bote(s) 1L`);
+        selladorStr = sParts.join(' + ');
+      }
+
+      let html = `
         <p class="text-xs text-slate-400 mb-1">Línea seleccionada: <span class="text-white font-medium">${linea.nombre}</span></p>
         <p class="text-xs text-slate-400 mb-3">Área total: <span class="text-white font-medium">${area} m²</span> (a 2 manos)</p>
-        <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-1 text-sm">
-          <p class="text-xs text-slate-400 font-semibold mb-1">Presentación sugerida:</p>
-          <p>${empaquesStr.join(' + ')}</p>
-        </div>
+        <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-2 text-xs">
+          <div>
+            <p class="text-slate-400 font-semibold mb-1">• Acabado (Pintura):</p>
+            <p class="text-emerald-400 font-bold text-sm">${empaquesStr.join(' + ')}</p>
+          </div>
       `;
+
+      if (incSellador) {
+        html += `
+          <div class="border-t border-slate-800 pt-2">
+            <p class="text-slate-400 font-semibold mb-1">• Preparador/Sellador de Muros:</p>
+            <p class="text-emerald-400 font-bold text-sm">${selladorStr}</p>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+      cont.innerHTML = html;
       card.classList.remove('hidden');
     }
 
