@@ -3,171 +3,284 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora de Material Meridian</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --green: #22c55e;
-      --border: #334155;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; }
-    .container { width: 100%; max-width: 480px; background: var(--card); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid var(--border); }
-    h1 { font-size: 1.4rem; text-align: center; margin-bottom: 4px; color: #fff; }
-    p.sub { font-size: 0.85rem; text-align: center; color: var(--muted); margin-bottom: 24px; }
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
-    .row { display: flex; gap: 10px; }
-    input, select { width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; color: #fff; font-size: 1rem; outline: none; transition: border-color 0.2s; }
-    input:focus, select:focus { border-color: var(--accent); }
-    button { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
-    button:hover { background: var(--accent-hover); }
-    .results { margin-top: 24px; padding: 18px; background: #0f172a; border-radius: 12px; border: 1px solid var(--border); display: none; }
-    .results.active { display: block; }
-    .res-header { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .res-main { font-size: 2rem; font-weight: 800; color: var(--green); margin-bottom: 12px; }
-    .breakdown { list-style: none; border-top: 1px solid var(--border); padding-top: 12px; font-size: 0.9rem; line-height: 1.6; }
-    .breakdown li { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .sugerencia-box { margin-top: 10px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.9rem; line-height: 1.5; border: 1px solid rgba(255,255,255,0.05); }
-    .cross-sell { margin-top: 14px; padding: 12px; background: rgba(37, 99, 235, 0.15); border-left: 4px solid var(--accent); border-radius: 6px; font-size: 0.85rem; line-height: 1.5; }
-  </style>
+  <title>Calculadora Meridian</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
-<div class="container">
-  <h1>Calculadora de Material</h1>
-  <p class="sub">Rendimiento exacto Meridian para pintura y sellador</p>
-
-  <div class="form-group">
-    <label>Por Dimensiones de Pared:</label>
-    <div class="row">
-      <input type="number" id="base" placeholder="Ancho (m)" step="0.1" inputmode="decimal">
-      <input type="number" id="altura" placeholder="Alto (m)" step="0.1" inputmode="decimal">
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label>O Área Total Directa (m²):</label>
-    <input type="number" id="areaDirecta" placeholder="Ej. 120" step="0.1" inputmode="decimal">
-  </div>
-
-  <div class="form-group">
-    <label>Línea / Calidad de Pintura:</label>
-    <select id="lineaPintura">
-      <option value="clasica" selected>Clásica 3 Años (114 - 133 m²/cubeta a 2 manos)</option>
-      <option value="plus">Meridian Plus (133 - 152 m²/cubeta a 2 manos)</option>
-      <option value="premier">Meridian Premier (152 - 171 m²/cubeta a 2 manos)</option>
-      <option value="porosa">Superficie Porosa / Sin Pintar (100 - 120 m²/cubeta a 2 manos)</option>
-    </select>
-  </div>
-
-  <div class="form-group">
-    <label>Número de manos:</label>
-    <select id="manos">
-      <option value="2" selected>2 Manos (Estándar de etiqueta)</option>
-      <option value="1">1 Mano (Retoque ligero)</option>
-      <option value="3">3 Manos (Cambio drástico de tono)</option>
-    </select>
-  </div>
-
-  <button onclick="calcular()">Calcular Cubetaje</button>
-
-  <div class="results" id="resBox">
-    <div class="res-header">Cálculo Estimado de Pintura</div>
-    <div class="res-main" id="totalLitros">0 Litros</div>
+  <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 space-y-6">
     
-    <ul class="breakdown">
-      <li><span>Superficie a cubrir:</span> <strong id="resArea">0 m²</strong></li>
-    </ul>
-
-    <div class="sugerencia-box">
-      <strong style="color:var(--accent);">Sugerencia de compra (Pintura):</strong>
-      <div id="resPresentacion" style="margin-top:6px;"></div>
+    <!-- Encabezado -->
+    <div class="text-center space-y-1">
+      <h1 class="text-2xl font-bold tracking-tight text-white">Calculadora Meridian</h1>
+      <p class="text-xs text-slate-400">Herramienta de cubetaje y rendimiento en mostrador</p>
     </div>
 
-    <div class="cross-sell">
-      💡 <strong>Venta Cruzada Recomendada (Sellador):</strong><br>
-      Aplica 1 mano de Sellador Meridian (rendimiento 30 m²/L diluido).<br>
-      Necesitas: <strong id="litrosSellador">0 L</strong> <span id="presSellador"></span>.
+    <!-- Selector de Pestañas (Tabs) -->
+    <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+      <button id="tab-pintura" onclick="switchTab('pintura')" class="py-2 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-md">Pintura</button>
+      <button id="tab-imper" onclick="switchTab('imper')" class="py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">Impermeabilizante</button>
     </div>
+
+    <!-- MÓDULO PINTURA -->
+    <div id="modulo-pintura" class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Por Dimensiones de Pared (m):</label>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" id="p-ancho" placeholder="Ancho (m)" oninput="calcPinturaArea()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <input type="number" id="p-alto" placeholder="Alto (m)" oninput="calcPinturaArea()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">O Área Total de Superficie (m²):</label>
+        <input type="number" id="p-area" placeholder="Ej. 45" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Línea de Pintura Meridian:</label>
+        <select id="p-linea" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <option value="10">Meridian Profesional / Vinílica (10 m²/L a 1 mano)</option>
+          <option value="8">Meridian Clásica (8 m²/L a 1 mano)</option>
+          <option value="6">Meridian Económica / Contrato (6 m²/L a 1 mano)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Manos requeridas:</label>
+        <select id="p-manos" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <option value="2" selected>2 Manos (Recomendado estándar)</option>
+          <option value="1">1 Mano (Mantenimiento / Cambio leve)</option>
+          <option value="3">3 Manos (Superficie porosa / Cambio drástico)</option>
+        </select>
+      </div>
+
+      <button onclick="calcularPintura()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm shadow-lg shadow-blue-600/20 transition-all">Calcular Pintura</button>
+    </div>
+
+    <!-- MÓDULO IMPERMEABILIZANTE -->
+    <div id="modulo-imper" class="space-y-4 hidden">
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Por Dimensiones de Azotea (m):</label>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" id="i-largo" placeholder="Largo (m)" oninput="calcImperArea()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <input type="number" id="i-ancho" placeholder="Ancho (m)" oninput="calcImperArea()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">O Área Total de Azotea (m²):</label>
+        <input type="number" id="i-area" placeholder="Ej. 100" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Línea Meridian Impermeabilizante:</label>
+        <select id="i-linea" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <option value="3">Meridian 3 Años (Cubeta 19L y Galón 4L)</option>
+          <option value="7">Meridian 7 Años (Solo Cubeta 19L)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Preparación de Superficie (Primario / Sellador):</label>
+        <select id="i-sellador-tipo" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <option value="independiente">Sellador Acrílico Independiente (Cubeta / Galón)</option>
+          <option value="mismo">Sellar con mismo Impermeabilizante (Diluido 1:4 con agua)</option>
+          <option value="ninguno">Sin Sellador (Superficie ya preparada)</option>
+        </select>
+      </div>
+
+      <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
+        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+          <input type="checkbox" id="i-malla" checked class="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0">
+          <span>Incluir Malla de Refuerzo (+10% traslape)</span>
+        </label>
+      </div>
+
+      <button onclick="calcularImper()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm shadow-lg shadow-blue-600/20 transition-all">Calcular Sistema Impermeable</button>
+    </div>
+
+    <!-- CONTENEDOR DE RESULTADOS -->
+    <div id="resultado" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-blue-400" id="resultado-titulo">Desglose de Material</h3>
+      <div id="resultado-detalles" class="space-y-2 text-sm text-slate-200"></div>
+    </div>
+
   </div>
-</div>
 
-<script>
-function calcular() {
-  const base = parseFloat(document.getElementById('base').value) || 0;
-  const altura = parseFloat(document.getElementById('altura').value) || 0;
-  const areaDirecta = parseFloat(document.getElementById('areaDirecta').value) || 0;
+  <script>
+    function switchTab(tab) {
+      const modPintura = document.getElementById('modulo-pintura');
+      const modImper = document.getElementById('modulo-imper');
+      const btnPintura = document.getElementById('tab-pintura');
+      const btnImper = document.getElementById('tab-imper');
+      const divRes = document.getElementById('resultado');
 
-  let area = areaDirecta > 0 ? areaDirecta : (base * altura);
+      divRes.classList.add('hidden');
 
-  if (area <= 0) {
-    alert("Ingresa dimensiones válidas o el área en m².");
-    return;
-  }
-
-  const linea = document.getElementById('lineaPintura').value;
-  const manos = parseInt(document.getElementById('manos').value);
-
-  let rend2Manos = 6.5; 
-  if (linea === 'plus') rend2Manos = 7.5; 
-  if (linea === 'premier') rend2Manos = 8.5; 
-  if (linea === 'porosa') rend2Manos = 5.5; 
-
-  const factorManos = manos / 2;
-  const litrosTotales = (area / rend2Manos) * factorManos;
-  const litrosRedondeados = Math.ceil(litrosTotales * 10) / 10;
-
-  let rest = Math.ceil(litrosTotales);
-  let cubetas = 0;
-  let galones = 0;
-  let botes = 0;
-
-  if (rest >= 15) {
-    cubetas = Math.ceil(rest / 19);
-  } else {
-    galones = Math.floor(rest / 4);
-    rest %= 4;
-    
-    if (rest === 3) {
-      galones += 1;
-    } else {
-      botes = rest;
+      if (tab === 'pintura') {
+        modPintura.classList.remove('hidden');
+        modImper.classList.add('hidden');
+        btnPintura.className = "py-2 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-md";
+        btnImper.className = "py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+      } else {
+        modPintura.classList.add('hidden');
+        modImper.classList.remove('hidden');
+        btnImper.className = "py-2 text-xs font-bold rounded-lg transition-all bg-blue-600 text-white shadow-md";
+        btnPintura.className = "py-2 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200";
+      }
     }
-  }
 
-  let presentacionTexto = [];
-  if (cubetas > 0) presentacionTexto.push(`• <strong>${cubetas}</strong> Cubeta(s) de 19L`);
-  if (galones > 0) presentacionTexto.push(`• <strong>${galones}</strong> Galón(es) de 4L`);
-  if (botes > 0) presentacionTexto.push(`• <strong>${botes}</strong> Bote(s) de 1L`);
+    function calcPinturaArea() {
+      const a = parseFloat(document.getElementById('p-ancho').value) || 0;
+      const h = parseFloat(document.getElementById('p-alto').value) || 0;
+      if (a > 0 && h > 0) document.getElementById('p-area').value = (a * h).toFixed(2);
+    }
 
-  const litrosSelladorReq = Math.ceil(area / 30);
-  let presSelladorTexto = "";
+    function calcImperArea() {
+      const l = parseFloat(document.getElementById('i-largo').value) || 0;
+      const a = parseFloat(document.getElementById('i-ancho').value) || 0;
+      if (l > 0 && a > 0) document.getElementById('i-area').value = (l * a).toFixed(2);
+    }
 
-  if (litrosSelladorReq >= 15) {
-    const cubSell = Math.ceil(litrosSelladorReq / 19);
-    presSelladorTexto = `(${cubSell} Cubeta(s) de 19L)`;
-  } else if (litrosSelladorReq >= 3) {
-    const galSell = Math.ceil(litrosSelladorReq / 4);
-    presSelladorTexto = `(${galSell} Galón(es) de 4L)`;
-  } else {
-    presSelladorTexto = `(${litrosSelladorReq} Bote(s) de 1L)`;
-  }
+    function calcularPintura() {
+      const area = parseFloat(document.getElementById('p-area').value);
+      if (!area || area <= 0) return alert('Ingresa un área válida');
 
-  document.getElementById('resArea').innerText = `${area.toFixed(1)} m²`;
-  document.getElementById('totalLitros').innerText = `${litrosRedondeados} Litros`;
-  document.getElementById('resPresentacion').innerHTML = presentacionTexto.join("<br>") || "• 1 Bote de 1L";
-  document.getElementById('litrosSellador').innerText = `${litrosSelladorReq} L`;
-  document.getElementById('presSellador').innerText = presSelladorTexto;
+      const rendXlitro = parseFloat(document.getElementById('p-linea').value);
+      const manos = parseInt(document.getElementById('p-manos').value);
 
-  document.getElementById('resBox').classList.add('active');
-}
-</script>
+      const litrosTotales = (area * manos) / rendXlitro;
+      
+      let cubetas = Math.floor(litrosTotales / 19);
+      let restoLitros = litrosTotales % 19;
+      let galones = 0;
+      let litrosPuros = 0;
 
+      if (restoLitros > 0) {
+        galones = Math.floor(restoLitros / 4);
+        restoLitros = restoLitros % 4;
+        if (restoLitros > 0) {
+          litrosPuros = Math.ceil(restoLitros);
+          if (litrosPuros >= 4) {
+            galones += 1;
+            litrosPuros = 0;
+          }
+        }
+        if (galones >= 4) {
+          cubetas += 1;
+          galones = 0;
+        }
+      }
+
+      let empaqueStr = [];
+      if (cubetas > 0) empaqueStr.push(`${cubetas} Cubeta(s) 19L`);
+      if (galones > 0) empaqueStr.push(`${galones} Galón(es) 4L`);
+      if (litrosPuros > 0) empaqueStr.push(`${litrosPuros} Bote(s) 1L`);
+
+      let html = `<p class="text-xs text-slate-400">Área total: <b class="text-white">${area} m²</b> (${manos} manos)</p>`;
+      html += `<p class="text-xs text-slate-400 mb-2">Litros netos calculados: <b class="text-white">${litrosTotales.toFixed(1)} L</b></p>`;
+      html += `<div class="bg-slate-900 p-3 rounded-lg border border-slate-800">
+        <span class="text-xs font-semibold text-slate-300 block mb-1">Presentación sugerida:</span>
+        <b class="text-blue-400 text-sm">${empaqueStr.join(' + ') || '1 Bote(s) 1L'}</b>
+      </div>`;
+
+      document.getElementById('resultado-titulo').innerText = 'Material de Pintura Requerido';
+      document.getElementById('resultado-detalles').innerHTML = html;
+      document.getElementById('resultado').classList.remove('hidden');
+    }
+
+    function calcularImper() {
+      const area = parseFloat(document.getElementById('i-area').value);
+      if (!area || area <= 0) return alert('Ingresa un área válida');
+
+      const linea = document.getElementById('i-linea').value;
+      const tipoSellador = document.getElementById('i-sellador-tipo').value;
+      const incluirMalla = document.getElementById('i-malla').checked;
+
+      let litrosPuros = area; 
+      let notasSellador = '';
+
+      if (tipoSellador === 'mismo') {
+        const litrosPrimario = area / 20; 
+        litrosPuros += litrosPrimario;
+        notasSellador = `Incluye ${litrosPrimario.toFixed(1)}L extra para primario (diluido 1:4 con agua).`;
+      }
+
+      let cubetasImper = 0;
+      let galonesImper = 0;
+
+      if (linea === '3') {
+        cubetasImper = Math.floor(litrosPuros / 19);
+        const restoLitros = litrosPuros % 19;
+        if (restoLitros > 0) {
+          galonesImper = Math.ceil(restoLitros / 4);
+          if (galonesImper >= 4) {
+            cubetasImper += 1;
+            galonesImper = 0;
+          }
+        }
+      } else {
+        cubetasImper = Math.ceil(litrosPuros / 19);
+        galonesImper = 0;
+      }
+
+      let html = `<p class="text-xs text-slate-400 mb-2">Superficie de azotea: <b class="text-white">${area} m²</b></p><ul class="space-y-2">`;
+
+      let textoEmpaque = '';
+      if (cubetasImper > 0) textoEmpaque += `${cubetasImper} Cubeta(s) 19L`;
+      if (galonesImper > 0) {
+        if (textoEmpaque) textoEmpaque += ' + ';
+        textoEmpaque += `${galonesImper} Galón(es) 4L`;
+      }
+
+      html += `<li class="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-semibold text-slate-300">Meridian ${linea} Años:</span> 
+          <b class="text-blue-400 text-sm">${textoEmpaque}</b>
+        </div>
+        ${notasSellador ? `<p class="text-[11px] text-emerald-400 mt-1">${notasSellador}</p>` : ''}
+      </li>`;
+
+      if (tipoSellador === 'independiente') {
+        let textoSellador = '';
+        const cubetasSellador = Math.floor(area / 50);
+        const restoAreaSellador = area % 50;
+        let galonesSellador = 0;
+
+        if (restoAreaSellador > 0) {
+          galonesSellador = Math.ceil(restoAreaSellador / 10.5);
+          if (galonesSellador >= 4) {
+            textoSellador = `${cubetasSellador + 1} Cubeta(s) 19L`;
+          } else if (cubetasSellador > 0) {
+            textoSellador = `${cubetasSellador} Cubeta(s) 19L + ${galonesSellador} Galón(es) 4L`;
+          } else {
+            textoSellador = `${galonesSellador} Galón(es) 4L`;
+          }
+        } else {
+          textoSellador = `${cubetasSellador} Cubeta(s) 19L`;
+        }
+
+        html += `<li class="flex justify-between items-center bg-slate-900/50 p-2 rounded border border-slate-800/80 text-xs text-slate-300">
+          <span>Sellador Acrílico Independiente:</span> 
+          <b class="text-emerald-400">${textoSellador}</b>
+        </li>`;
+      }
+
+      if (incluirMalla) {
+        const m2Malla = Math.ceil(area * 1.10);
+        html += `<li class="flex justify-between items-center bg-slate-900/50 p-2 rounded border border-slate-800/80 text-xs text-slate-300">
+          <span>Malla de Refuerzo:</span> 
+          <b class="text-emerald-400">${m2Malla} m² (con 10% traslape)</b>
+        </li>`;
+      }
+
+      html += `</ul><p class="text-[11px] text-slate-500 pt-2 border-t border-slate-800 mt-2">Rendimiento Meridian: 1 L/m² a 2 manos (19 m²/cubeta, 4 m²/galón).</p>`;
+
+      document.getElementById('resultado-titulo').innerText = 'Sistema Impermeable Requerido';
+      document.getElementById('resultado-detalles').innerHTML = html;
+      document.getElementById('resultado').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
